@@ -1,8 +1,9 @@
 /* ---------------------------------------------------
-   JSS DAILY PLANNER — FINAL VERSION (NO FIREBASE)
-   ✔ Login with 8-digit PRM ID
+   JSS DAILY PLANNER — FINAL VERSION
+   ✔ Strict Login (8-digit & starts with 66)
    ✔ Input Page
-   ✔ Output Page with 2 tiles
+   ✔ Output Page (2 tiles only)
+   ✔ GitHub Pages friendly (no Firebase)
 ---------------------------------------------------- */
 
 ///////////////////////////////////////////////////////
@@ -12,7 +13,7 @@ const qs = (s) => document.querySelector(s);
 const html = (s, h) => (qs(s).innerHTML = h);
 
 ///////////////////////////////////////////////////////
-// LOGIN PAGE
+// LOGIN PAGE (STRICT VALIDATION)
 ///////////////////////////////////////////////////////
 function showLoginView() {
     html("#content", `
@@ -24,13 +25,15 @@ function showLoginView() {
 
         <label class="text-sm font-semibold">Name (Optional)</label>
         <input id="loginName"
-            class="w-full p-3 border rounded-lg mt-1 mb-4" placeholder="John">
+            class="w-full p-3 border rounded-lg mt-1 mb-4" placeholder="Your Name">
 
         <button id="loginBtn"
             class="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold">Login</button>
 
         <p id="loginError"
-           class="text-red-600 text-sm mt-3 hidden">Invalid ID. Must be 8 digits & start with 66.</p>
+           class="text-red-600 text-sm mt-3 hidden">
+           ❌ Invalid ID. Enter an 8-digit number starting with 66.
+        </p>
     `);
 
     qs("#loginBtn").onclick = () => {
@@ -44,7 +47,6 @@ function showLoginView() {
 
         localStorage.setItem("jss_id", id);
         localStorage.setItem("jss_name", name);
-
         showInputView();
     };
 }
@@ -59,10 +61,10 @@ function getPayCycle(today) {
 
     let start, end;
 
-    if (d <= 7) { start = 1; end = 7; }
-    else if (d <= 14) { start = 8; end = 14; }
-    else if (d <= 21) { start = 15; end = 21; }
-    else { start = 22; end = new Date(y, m + 1, 0).getDate(); }
+    if (d <= 7)      { start = 1; end = 7; }
+    else if (d <= 14){ start = 8; end = 14; }
+    else if (d <= 21){ start = 15; end = 21; }
+    else             { start = 22; end = new Date(y, m + 1, 0).getDate(); }
 
     return {
         start,
@@ -73,7 +75,7 @@ function getPayCycle(today) {
 }
 
 ///////////////////////////////////////////////////////
-// CALCULATIONS
+// CALCULATION LOGIC
 ///////////////////////////////////////////////////////
 function calculatePoints(target, days) {
     const solve = (T, rate, d, bonus) => (T - d * bonus) / rate;
@@ -101,7 +103,8 @@ function showInputView() {
     const cycle = getPayCycle(today);
     const remainingDays = cycle.end - today.getDate() + 1;
 
-    const fmt = (d) => d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+    const fmt = (d) =>
+        d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
 
     html("#content", `
         <h1 class="text-2xl font-bold text-indigo-700 mb-1">JSS Daily Planner</h1>
@@ -152,7 +155,7 @@ function showInputView() {
 }
 
 ///////////////////////////////////////////////////////
-// OUTPUT PAGE (2 TILES ONLY)
+// OUTPUT PAGE (2 TILES)
 ///////////////////////////////////////////////////////
 function showResultsPage(dailyPoints, dailyEarning, totalPoints) {
     html("#content", `
