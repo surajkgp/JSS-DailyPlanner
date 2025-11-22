@@ -1,1 +1,43 @@
-xx
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSS Daily Planner</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <div id="app-container" class="min-h-screen flex items-start justify-center p-4">
+        <div id="planner-content-wrapper" class="w-full max-w-md bg-white shadow-xl rounded-2xl p-6">
+            <div id="dynamic-content"></div>
+        </div>
+    </div>
+
+    <!-- Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Main App -->
+    <script type="module" src="assets/js/app.js"></script>
+
+</body>
+</html>
