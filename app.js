@@ -1,5 +1,5 @@
-/* JSS DAILY PLANNER — Robust Final with Animations (v2.2)
-   - All fixes applied (cases 1,2,3,4,5,7,9,17,20)
+/* JSS DAILY PLANNER — Robust Final (v2.1)
+   - All requested fixes applied (cases 1,2,3,4,5,7,9,17,20)
    - Dynamic "Last X Days" logic included (disabled on Day 1)
    - Forced login every load (only our keys cleared)
    - Inline validation and friendly inline errors (no alerts)
@@ -7,13 +7,15 @@
    - Name sanitization + truncation + title tooltip
    - html2canvas download fallback with friendly message
    - Disclaimer on all pages
-   - Animations: Pay Cycle period (fade+slide) and KPI tiles (pop)
-   - No header image used in UI (uploaded path kept as constant for tooling)
+   - No header image used in UI
+   - NOTE: Uploaded file path (kept as constant for tooling) below
 */
 
-/* ---------------- REFERENCE TO UPLOADED FILE (kept but not used in UI) ----- */
+/* ---------------- REFERENCE TO UPLOADED FILE (DO NOT USE IN UI) -------------
+   Per developer/tooling instructions: include the local path to the uploaded file.
+   This path is preserved for any later tool call that converts it to a URL.
+------------------------------------------------------------------------- */
 const UPLOADED_IMAGE_PATH = '/mnt/data/69102280-9abc-4fe9-b2d8-2a163f8dcba5.png';
-/* -------------------------------------------------------------------------- */
 
 /* ---------------- Utilities ---------------- */
 const qs = (s) => document.querySelector(s);
@@ -49,7 +51,7 @@ function clearInlineError(containerSelector) {
   if (el) el.style.display = 'none';
 }
 
-/* ---------------- Minimal global styles + animations ---------------- */
+/* ---------------- Minimal global styles (errors/truncation) ---------------- */
 (function addGlobalStyles() {
   if (document.getElementById('jss-final-styles')) return;
   const st = document.createElement('style');
@@ -60,33 +62,6 @@ function clearInlineError(containerSelector) {
     .jss-note{font-size:12px;color:#6b7280}
     .prm-name{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block}
     button:disabled{opacity:.6;cursor:not-allowed}
-
-    /* Pay cycle animation: fade + slide up */
-    .jss-paycycle-anim {
-      opacity: 0;
-      transform: translateY(8px);
-      animation: paycycleFadeUp 420ms cubic-bezier(.22,.95,.28,1) forwards;
-    }
-    @keyframes paycycleFadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* KPI tile pop animation */
-    .jss-kpi-pop {
-      opacity: 0;
-      transform: scale(.96);
-      animation: kpiPop 520ms cubic-bezier(.18,.9,.32,1) forwards;
-    }
-    @keyframes kpiPop {
-      0% { opacity: 0; transform: scale(.96); }
-      60% { opacity: 1; transform: scale(1.04); }
-      100% { transform: scale(1); }
-    }
-
-    /* small responsive helpers */
-    .kpi-row { display:flex; gap:1rem; overflow-x:auto; padding-bottom:4px; }
-    .kpi-item { min-width:180px; flex:1 0 180px; }
-    @media (min-width:640px) { .kpi-item { min-width:0; flex:1; } }
   `;
   document.head.appendChild(st);
 })();
@@ -128,7 +103,7 @@ function earning(points, rate) {
 }
 
 /* ---------------- Login rate limiter (sessionStorage) ---------------- */
-const LOGIN_KEY = 'jss_login_attempts_v22';
+const LOGIN_KEY = 'jss_login_attempts_v21';
 const MAX_ATTEMPTS = 6;
 const WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -211,6 +186,7 @@ function showLoginView() {
     const id = idRaw.trim();
     const name = nameRaw.trim();
 
+    // rate limiter
     const res = recordLoginAttempt();
     if (!res.allowed) {
       showInlineError('#loginErrorContainer', `Too many attempts. Try again in ${res.retryAfter || 60} seconds.`);
@@ -228,6 +204,7 @@ function showLoginView() {
       localStorage.setItem('jss_id', id);
       localStorage.setItem('jss_name', safeName);
     } catch (e) {
+      // localStorage might be blocked: notify user but continue
       showInlineError('#loginErrorContainer', 'Browser storage unavailable — your session may not persist if you refresh.');
     }
 
@@ -245,11 +222,12 @@ function showInputView() {
   const fmt = (d) => d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
 
   // determine dynamic X (last X days)
-  const dayNumber = (today.getDate() - cycle.start) + 1; // 1-based day index in pay cycle
-  const X = Math.max(0, dayNumber - 1); // last X days
+  // dayNumber is which day of this pay cycle today is (1-based)
+  const dayNumber = (today.getDate() - cycle.start) + 1;
+  const X = Math.max(0, dayNumber - 1); // if dayNumber = 1 => X = 0
   const pointsDisabled = X === 0;
 
-  // PRM display safe + truncated
+  // PRM display (safe + truncated)
   const rawName = localStorage.getItem('jss_name') || '';
   const displayName = rawName.length > 20 ? rawName.slice(0, 20) + '…' : rawName;
   const safeDisplayName = escapeHtml(displayName);
@@ -272,7 +250,7 @@ function showInputView() {
       <p class="text-sm text-gray-500 mt-1">Enter your goal. Get your daily target instantly.</p>
     </div>
 
-    <div class="text-center mb-4 jss-paycycle-anim">
+    <div class="text-center mb-4">
       <div class="text-sm font-semibold text-indigo-700">Your Pay Cycle</div>
       <div class="text-lg font-bold text-gray-800">${fmt(cycle.sDate)} – ${fmt(cycle.eDate)}</div>
     </div>
@@ -308,8 +286,7 @@ function showInputView() {
     ${disclaimerHTML()}
   `);
 
-  // after render: attach a tiny delayed pop animation to KPI container when results show (applies later)
-  // calculation handler
+  // calculation handler with robust validation (fixes cases 1,2,3,4,5,7)
   qs('#calcForm').onsubmit = (e) => {
     e.preventDefault();
     clearInlineError('#inputErrorContainer');
@@ -322,26 +299,31 @@ function showInputView() {
     const earned = Number(earnedRaw) || 0;
     const days = Number(daysRaw);
 
+    // Case 1: target <= 0
     if (!Number.isFinite(target) || target <= 0) {
       showInlineError('#inputErrorContainer', 'Please enter a valid earning goal greater than 0.');
       return;
     }
 
+    // Case 3: negative earned
     if (!Number.isFinite(earned) || earned < 0) {
       showInlineError('#inputErrorContainer', 'Points earned cannot be negative.');
       return;
     }
 
+    // Case 2: days invalid or zero
     if (!Number.isFinite(days) || days <= 0) {
       showInlineError('#inputErrorContainer', 'Please enter at least 1 available day.');
       return;
     }
 
+    // Case 4 & 5: cap/validate days relative to remaining
     if (days > remaining) {
       showInlineError('#inputErrorContainer', `Available days cannot exceed remaining days in cycle (${remaining}).`);
       return;
     }
 
+    // compute required points and handle earned >= required (Case 7)
     const { points: requiredPoints, rate: baseRate } = calculatePoints(target, days);
     const remainingPoints = Math.max(0, requiredPoints - earned);
     const finalTotal = earned + remainingPoints;
@@ -387,7 +369,7 @@ function showResultsPage(r) {
       <h2 class="text-xl font-extrabold text-indigo-700">Your Daily Plan</h2>
     </div>
 
-    <div class="card p-5 mb-4 bg-indigo-50 border border-indigo-200 rounded-lg jss-paycycle-anim">
+    <div class="card p-5 mb-4 bg-indigo-50 border border-indigo-200 rounded-lg">
       <div class="text-center text-sm font-semibold text-indigo-800 mb-3">Cycle Progress Summary</div>
 
       <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
@@ -400,19 +382,19 @@ function showResultsPage(r) {
       </div>
     </div>
 
-    <div class="kpi-row mb-4">
-      <div class="kpi-item jss-kpi-pop p-5 bg-white rounded-lg text-center shadow">
-        <div class="text-4xl font-extrabold text-indigo-700">${r.daily}</div>
-        <div class="text-sm text-gray-500 mt-1">Daily Target Points</div>
+    <div style="display:flex;gap:1rem;margin-bottom:12px;overflow-x:auto">
+      <div style="min-width:180px;flex:1;background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 16px rgba(16,24,40,0.06);text-align:center">
+        <div style="font-size:32px;font-weight:800;color:#3730a3">${r.daily}</div>
+        <div style="color:#6b7280;margin-top:6px">Daily Target Points</div>
       </div>
 
-      <div class="kpi-item jss-kpi-pop p-5 bg-white rounded-lg text-center shadow">
-        <div class="text-4xl font-extrabold text-green-700">₹${r.dailyEarn}</div>
-        <div class="text-sm text-gray-500 mt-1">Expected Daily Earnings</div>
+      <div style="min-width:180px;flex:1;background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 16px rgba(16,24,40,0.06);text-align:center">
+        <div style="font-size:32px;font-weight:800;color:#047857">₹${r.dailyEarn}</div>
+        <div style="color:#6b7280;margin-top:6px">Expected Daily Earnings</div>
       </div>
     </div>
 
-    ${r.finalTotal > 24 ? `<div style="background:#FEF3C7;padding:12px;border-radius:8px;color:#92400E;text-align:center;margin-bottom:12px;font-weight:600" class="jss-kpi-pop">You unlocked the higher rate: ₹40 per point!</div>` : ''}
+    ${r.finalTotal > 24 ? `<div style="background:#FEF3C7;padding:12px;border-radius:8px;color:#92400E;text-align:center;margin-bottom:12px;font-weight:600">You unlocked the higher rate: ₹40 per point!</div>` : ''}
 
     <div style="margin-bottom:12px">
       <button id="downloadBtn" style="width:100%;background:#059669;color:#fff;padding:12px;border-radius:8px;font-weight:700;border:0">Download Plan as Image</button>
@@ -421,7 +403,7 @@ function showResultsPage(r) {
     ${disclaimerHTML()}
   `);
 
-  // Insert Back button at top
+  // Insert a light-weight Back button at top
   const contentEl = qs('#content');
   const back = document.createElement('button');
   back.textContent = '← Back';
@@ -433,7 +415,7 @@ function showResultsPage(r) {
   back.onclick = showInputView;
   contentEl.insertBefore(back, contentEl.firstChild);
 
-  // Download handling with try/catch (graceful fallback)
+  // html2canvas download with try/catch (Case 9)
   qs('#downloadBtn').onclick = async () => {
     try {
       const el = qs('#content');
@@ -449,7 +431,7 @@ function showResultsPage(r) {
   };
 }
 
-/* Init (force login by clearing our keys only) */
+/* ---------------- Init (force login by clearing only our keys) ---------------- */
 window.addEventListener('DOMContentLoaded', () => {
   try {
     localStorage.removeItem('jss_id');
