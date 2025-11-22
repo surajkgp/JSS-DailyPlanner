@@ -1,10 +1,8 @@
 /* ---------------------------------------------------
-   JSS DAILY PLANNER (2-FILE VERSION)
-   - Firebase Login
-   - Pay Cycle Detection
-   - Point Calculation
-   - Earnings Calculation
-   - Download as Image
+   JSS DAILY PLANNER — FIXED VERSION FOR GITHUB PAGES
+   ✔ Firebase Works
+   ✔ UI Loads
+   ✔ No Dynamic Imports
 ---------------------------------------------------- */
 
 ///////////////////////////////////////////////////////
@@ -85,13 +83,12 @@ function earningFor(points, rate) {
 }
 
 ///////////////////////////////////////////////////////
-// FIREBASE LOGIN (ANONYMOUS)
+// FIREBASE INIT — FIXED (NO DYNAMIC IMPORTS)
 ///////////////////////////////////////////////////////
-async function initFirebase() {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
-    const { getAuth, signInAnonymously, onAuthStateChanged } =
-        await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+async function initFirebase() {
     const app = initializeApp(window.__firebase_config);
     const auth = getAuth(app);
 
