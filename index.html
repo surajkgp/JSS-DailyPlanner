@@ -1,21 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JSS Daily Planner</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JSS Daily Planner</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    /* subtle card lift */
+    .card { border-radius: 14px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
+    /* header image fit */
+    .header-visual { background-size: cover; background-position: center; border-top-left-radius:12px; border-top-right-radius:12px; }
+  </style>
 </head>
-
-<body class="bg-gray-100 font-['Inter']">
-    <div class="min-h-screen flex justify-center p-4">
-        <div id="content" class="w-full max-w-md bg-white p-6 rounded-2xl shadow-xl"></div>
+<body class="bg-gray-50">
+  <div class="min-h-screen flex items-start justify-center p-4 sm:p-8">
+    <div id="app" class="w-full max-w-lg">
+      <!-- App content injected here -->
+      <div id="content"></div>
     </div>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script type="module" src="app.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Main App -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
