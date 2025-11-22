@@ -214,6 +214,10 @@ function showResultsPage(r) {
 
 /* ---------- Init ---------- */
 window.onload = () => {
-  if (!localStorage.getItem('jss_id')) showLoginView();
-  else showInputView();
+  // Always clear saved login info
+  localStorage.removeItem('jss_id');
+  localStorage.removeItem('jss_name');
+
+  // Always start with login page
+  showLoginView();
 };
