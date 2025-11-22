@@ -1,36 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSS Daily Planner</title>
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
 
-    <!-- GA4 (replace with actual ID) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX');
-    </script>
-
-    <!-- Firebase Config -->
-    <script>
-        window.__firebase_config = {
-            apiKey: "AIzaSyAh0mLkY7k5I1-ihMu-MgGxfzF1ktn7ahc",
-    authDomain: "jss-daily-planner.firebaseapp.com",
-    projectId: "jss-daily-planner",
-    storageBucket: "jss-daily-planner.appspot.com",
-    messagingSenderId: "173343875926",
-    appId: "1:173343875926:web:3fbc25733e6b6f93ccacf7",
-    measurementId: "G-TE43F92Y76"
-        };
-    </script>
 </head>
 
 <body class="bg-gray-100 font-['Inter']">
@@ -38,10 +16,7 @@
         <div id="content" class="w-full max-w-md bg-white p-6 rounded-2xl shadow-xl"></div>
     </div>
 
-    <!-- Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- Main App -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
